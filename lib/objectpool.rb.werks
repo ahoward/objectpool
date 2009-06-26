@@ -1,0 +1,89 @@
+require 'thread'
+require 'timeout'
+
+class ObjectPool
+  def initialize(*args)
+    @timeout = nil
+    @q = Queue.new
+    args.each{|arg| put(arg)}
+  end
+
+  def get(&block)
+    object = @q.pop
+    if block
+      begin
+        block.call(object)
+      ensure
+        put(object)
+      end
+    else
+      object
+    end
+  end
+
+  def put(object)
+    @q.push(object)
+  end
+
+  def objects
+    objects = []
+    loop do
+      begin
+        objects << @q.pop(non_block=true)
+      rescue ThreadError
+        break
+      end
+    end
+    objects
+  end
+end
+
+
+if $0 == __FILE__
+# bitch fight over the objects
+#
+
+  pool = ObjectPool.new Array.new, Array.new, Array.new
+
+  n = 2**10
+  q = Queue.new
+
+  Thread.new do
+    Thread.current.abort_on_exception=true
+    n.times{ 42.times{ pool.get{} } }
+  end
+
+  n.times do
+    Thread.new do
+      Thread.current.abort_on_exception=true
+      sleep rand
+
+      Thread.new do
+        Thread.current.abort_on_exception=true
+        sleep rand
+        pool.get do |array|
+          array.push Thread.current.object_id
+        end
+        q.push 42
+      end
+    end
+  end
+
+  n.times{ q.pop }
+
+  sleep(rand)
+  loop do
+    begin
+      q.pop(non_block=true)
+      abort
+    rescue ThreadError
+      break
+    end
+  end
+
+  values = pool.objects.flatten
+
+  p values.size
+  p values.uniq.size
+  p Time.now
+end

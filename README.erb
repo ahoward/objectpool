@@ -1,0 +1,28 @@
+NAME
+  objectpool.rb
+
+DESCRIPTION
+  a simple, robust, generic thread-safe object pool for ruby
+
+SYNOPSIS
+
+  1) pre-configured with objects
+
+    connections = [connect, connect, connect, connect]
+    pool = ObjectPool.new 
+
+    Thread.new do
+      pool.get do |connection|
+        connection.send data
+      end
+    end
+
+  2) dynamically building objects as needed
+
+    pool = ObjectPool.new(:size => 4){ connect }
+
+    Thread.new do
+      pool.get do |connection|
+        connection.send data
+      end
+    end
