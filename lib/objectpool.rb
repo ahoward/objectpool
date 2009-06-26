@@ -125,6 +125,16 @@ class ObjectPool
   end
 end
 
+Objectpool = ObjectPool
+
+def ObjectPool(*args, &block)
+  ObjectPool.new(*args, &block)
+end
+
+def Objectpool(*args, &block)
+  Objectpool.new(*args, &block)
+end
+
 
 
 
@@ -207,5 +217,3 @@ if $0 == __FILE__
     busy.kill
   end
 end
-
-Objectpool = ObjectPool
