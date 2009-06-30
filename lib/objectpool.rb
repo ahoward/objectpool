@@ -12,7 +12,10 @@ class ObjectPool
   def initialize(*args, &block)
     @options = args.last.is_a?(Hash) ? args.pop : {}
     @objects = args
-    @size = Integer([@options[:size]||@options['size']||4.2, @objects.size].max)
+    @size = @options[:size] || @options['size']
+    @size ||= @objects.size unless @objects.empty?
+    @size ||= 4.2
+    @size = Integer(@size)
     @used = {}
     @mutex = Mutex.new
     @cond = ConditionVariable.new
