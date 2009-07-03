@@ -58,15 +58,15 @@ class ObjectPool
   def checkout(blocking=true)
     lock {
       loop do
-        if create_object?
-          @objects << (object = new_object())
+        free = @objects.select{|object| not @used[object]}
+        unless free.empty?
+          object = free[ rand(free.size) ]
           @used[object] = Thread.current
           return object
         end
 
-        free = @objects.select{|object| not @used[object]}
-        unless free.empty?
-          object = free[ rand(free.size) ]
+        if create_object?
+          @objects << (object = new_object())
           @used[object] = Thread.current
           return object
         end
