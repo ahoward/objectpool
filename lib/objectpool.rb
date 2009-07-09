@@ -146,7 +146,7 @@ if $0 == __FILE__
  
 # test bitch fighting over the objects - this should run forever
 #
-  require 'yaml'
+  require 'pp'
   require 'time'
 
   n = 2**10
@@ -206,9 +206,9 @@ if $0 == __FILE__
       values = pool.objects.flatten
 
       if values.size==values.uniq.size
-        y 'pass' => Time.now.iso8601(2)
+        pp 'pass' => Time.now.iso8601(2)
       else
-        y(
+        pp(
           'size' => values.size,
           'uniq' => values.uniq.size,
           'fail' => Time.now.iso8601(2)
